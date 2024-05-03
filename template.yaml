@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  first-sam-app
+
+  Sample SAM Template for first-sam-app
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+
+#Important
+Resources:
+  DailyQuoteFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: lambda/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      FunctionName: daily_quotes
+      Role: !GetAtt DailyQuoteRole.Arn
+      Environment:
+        Variables:
+          TopicArn: "arn:aws:sns:us-west-2:381731343673:DailyQuote"
+
+
+  DailyQuoteRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /daily_quote/
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: SNSPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                 - sns:Publish
+                Resource: "*"
+                Effect: Allow
+      
+
+
